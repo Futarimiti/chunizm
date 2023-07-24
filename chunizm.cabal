@@ -29,10 +29,10 @@ version:            0.1.0.0
 -- description:
 
 -- The license under which the package is released.
-license:            BSD-2-Clause
+-- license:            BSD-2-Clause
 
 -- The file containing the license text.
-license-file:       LICENSE
+-- license-file:       LICENSE
 
 -- The package author(s).
 author:             Futar
@@ -46,7 +46,7 @@ category:           Game
 build-type:         Simple
 
 -- Extra doc files to be distributed with the package, such as a CHANGELOG or a README.
-extra-doc-files:    CHANGELOG.md
+-- extra-doc-files:    CHANGELOG.md
 
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 -- extra-source-files:

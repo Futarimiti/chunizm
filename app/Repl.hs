@@ -54,7 +54,7 @@ display [x] p = case readMaybe x of
                   Just n -> case nthSolution of
                               Just sol -> return $ mkResult sol Continue Nothing
                               Nothing  -> return $ mkResult "" Continue Nothing
-                    where nthSolution = solutions p `atMay` n
+                    where nthSolution = solutions p `atMay` (n - 1)
 display xs _ = return $ mkResult (arityMismatch 1 (length xs)) Continue Nothing
 
 showPuzzle' :: Command
