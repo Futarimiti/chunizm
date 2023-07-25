@@ -1,9 +1,11 @@
 {-# LANGUAGE TypeApplications #-}
+
 module Repl (repl) where
 
 import           Config               (Config (..), userConfig, userPrompt)
 import           Control.Exception    (SomeException, catch)
-import           Control.Monad        (when)
+import           Control.Monad        (when, (>=>))
+import           Data.Functor         ((<&>))
 import qualified Data.Map.Lazy        as M
 import           Data.Maybe           (fromMaybe)
 import           Error                (aritiesMismatch, arityMismatch,
@@ -19,8 +21,7 @@ import           Text.Printf          (printf)
 import           Text.Read            (readMaybe)
 
 repl :: IO ()
-repl = do _ <- installSIGINTHandler
-          catch @SomeException (replWithPuzzle emptyPuzzle) (const $ putStrLn "" >> endMsg >>= putStrLn)
+repl = installSIGINTHandler >> catch @SomeException (replWithPuzzle emptyPuzzle) (const $ putStrLn "" >> endMsg >>= putStrLn)
 
 replWithPuzzle :: Puzzle -> IO ()
 replWithPuzzle p = do putPrompt
@@ -49,16 +50,15 @@ display :: Command
 display [] p = showPuzzle' [] p
 display ["solutions"] p = showSolutions [] p
 display ["puzzle"] p = showPuzzle' [] p
-display [x] p = case readMaybe x of
-                  Nothing -> return $ mkResult (illegalArg x) Continue Nothing
-                  Just n -> case nthSolution of
-                              Just sol -> return $ mkResult sol Continue Nothing
-                              Nothing  -> return $ mkResult "" Continue Nothing
-                    where nthSolution = solutions p `atMay` (n - 1)
+display [x] p = return $ maybe (mkResult (illegalArg x) Continue Nothing)
+                               (maybe empty minimal . atMay (solutions p) . subtract 1)
+                               (readMaybe x)
+                                 where empty = mkResult "" Continue Nothing
+                                       minimal sol = mkResult sol Continue Nothing
 display xs _ = return $ mkResult (arityMismatch 1 (length xs)) Continue Nothing
 
 showPuzzle' :: Command
-showPuzzle' _ p = do str <- showPuzzle p
+showPuzzle' _ p = showPuzzle p >>= \str ->
                      return $ mkResult str Continue Nothing
 
 showSolutions :: Command
@@ -67,18 +67,15 @@ showSolutions _ p = return $ mkResult (labelledSolutions p) Continue Nothing
 -- generate new puzzle
 new :: Command
 -- temp
-new [] _ = do p <- userConfig >>= selectFromDB . defaultPuzzleSize
-              return $ mkResult "" Continue (Just p)
-new [n] _ = case readMaybe n of
-              Just x -> do p <- selectFromDB x
-                           return $ mkResult "" Continue (Just p)
-              Nothing -> return $ mkResult (illegalArg n) Continue Nothing
+new [] _ = userConfig >>= selectFromDB . defaultPuzzleSize <&> mkResult "" Continue . Just
+new [n] _ = maybe (return $ mkResult (illegalArg n) Continue Nothing)
+                  (selectFromDB >=> (return . mkResult "" Continue . Just))
+                  (readMaybe n)
 new xs _ = return $ mkResult (aritiesMismatch [0, 1] (length xs)) Continue Nothing
 
 uncover :: Command
-uncover [[c]] p = do revealed <- reveal c p
-                     return $ mkResult (printf "Uncovering letter %s..." [c]) Continue (Just revealed)
-uncover [_] _ = return $ mkResult "You can only cover one letter!" Continue Nothing
+uncover [[c]] p = reveal c p <&> mkResult (printf "Uncovering letter %s..." [c]) Continue . Just
+uncover [_] _ = return $ mkResult "You may only uncover a single letter!" Continue Nothing
 uncover xs _ = return $ mkResult (arityMismatch 1 (length xs)) Continue Nothing
 
 try :: Command
@@ -86,23 +83,20 @@ try [] _ = return $ mkResult (arityMismatch 1 (0 :: Int)) Continue Nothing
 try xs p = try1 (unwords xs) p  -- dirty, but may need refactor whole lot of things to fix FIXME
 
 try1 :: String -> Puzzle -> IO ReplResult
-try1 word p = do att <- attempt word p
-                 case att of
-                    Nothing -> return $ mkResult "" Continue (Just p)
-                    Just np -> return $ mkResult (printf "%s -> 💥" word) Continue (Just np)
-
+try1 word p = attempt word p >>= maybe (return $ mkResult "" Continue (Just p)) (return . mkResult "💥" Continue . Just)
 
 finish :: Command
-finish [] _ = do ending <- endMsg
-                 return $ mkResult ending Discontinue Nothing
+finish [] _ = endMsg >>= \e ->
+                 return $ mkResult e Discontinue Nothing
 finish xs _ = return $ mkResult (arityMismatch 0 (length xs)) Continue Nothing
 
 runReplCmd :: Puzzle -> String -> IO ReplResult
 runReplCmd p input = case words input of
                        [] -> return $ mkResult "" Continue Nothing
-                       cmd:args -> case replCmds !? cmd of
-                                     Nothing -> return $ mkResult (cmdNotFound cmd) Continue Nothing
-                                     Just f -> f args p
+                       cmd:args -> maybe
+                                     (return $ mkResult (cmdNotFound cmd) Continue Nothing)
+                                     (\f -> f args p)
+                                     (replCmds !? cmd)
 
 --- impl
 

@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric  #-}
-{-# LANGUAGE LambdaCase     #-}
 
 module Config ( userPrompt
               , dbPath
@@ -33,10 +32,7 @@ userPrompt = prompt <$> userConfig
 - $HOME/.chunizm
 -}
 configPath :: IO (Maybe FilePath)
-configPath = do maybePaths <- configPaths
-                let available = filterM (\case Nothing -> return False
-                                               Just f -> doesFileExist f) maybePaths
-                asum <$> available
+configPath = configPaths >>= fmap asum . filterM (maybe (return False) doesFileExist)
 
 configPaths :: IO [Maybe FilePath]
 configPaths = sequence [ lookupEnv "CHUNIZM_CONFIG"

@@ -1,6 +1,6 @@
 module Info (endMsg, putInfoLn) where
 
-import           Config       (configPath)
+import           Config       (configPath, dbPath)
 import           Data.Functor ((<&>))
 import qualified Data.Version as V
 import           Text.Printf  (printf)
@@ -23,6 +23,10 @@ endMsg = return "Leaving Chunizm."
 putInfoLn :: IO ()
 putInfoLn = do putDescLn
                putConfigInfoLn
+               putUsingDBLn
+
+putUsingDBLn :: IO ()
+putUsingDBLn = dbPath >>= putStrLn . printf "Using DB at %s"
 
 putConfigInfoLn :: IO ()
 putConfigInfoLn = configInfo >>= putStrLn
