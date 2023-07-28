@@ -51,6 +51,9 @@ build-type:         Simple
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 -- extra-source-files:
 
+data-dir:           resources
+data-files:         info.dhall
+
 common warnings
     ghc-options: -Wall
 
@@ -62,7 +65,7 @@ executable chunizm
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    Config, Info, Repl, Error, Puzzle, Util
+    other-modules:    Config, Info, Repl, Error, Puzzle, Util, Paths_chunizm
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

@@ -5,9 +5,11 @@
 module Info (info, Info(..), putInfoLn) where
 
 import           Config          (configPath, dbPath)
+import           Data.Text       (pack)
 import           Data.Version    (makeVersion, showVersion)
 import           Dhall           (FromDhall, Generic, auto, input)
 import           Numeric.Natural (Natural)
+import           Paths_chunizm   (getDataFileName)
 import           Text.Printf     (printf)
 
 data Info = Info { version    :: [Natural]
@@ -18,7 +20,7 @@ data Info = Info { version    :: [Natural]
                  } deriving (Show, Generic, FromDhall)
 
 info :: IO Info
-info = input auto "./resources/info.dhall"
+info = getDataFileName "info.dhall" >>= input auto . pack
 
 versionStr :: IO String
 versionStr = showVersion . makeVersion . map fromIntegral . version <$> info
