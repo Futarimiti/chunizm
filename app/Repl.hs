@@ -10,7 +10,7 @@ import qualified Data.Map.Lazy        as M
 import           Data.Maybe           (fromMaybe)
 import           Error                (aritiesMismatch, arityMismatch,
                                        cmdNotFound, illegalArg)
-import           Info                 (endMsg)
+import           Info                 (endMsg, info)
 import           Puzzle               (Puzzle, attempt, emptyPuzzle,
                                        labelledSolutions, printPuzzle, reveal,
                                        selectFromDB, showPuzzle, solutions)
@@ -21,7 +21,7 @@ import           Text.Printf          (printf)
 import           Text.Read            (readMaybe)
 
 repl :: IO ()
-repl = installSIGINTHandler >> catch @SomeException (replWithPuzzle emptyPuzzle) (const $ putStrLn "" >> endMsg >>= putStrLn)
+repl = installSIGINTHandler >> catch @SomeException (replWithPuzzle emptyPuzzle) (const $ putStrLn "" >> (endMsg <$> info) >>= putStrLn)
 
 replWithPuzzle :: Puzzle -> IO ()
 replWithPuzzle p = do putPrompt
@@ -86,8 +86,8 @@ try1 :: String -> Puzzle -> IO ReplResult
 try1 word p = attempt word p >>= maybe (return $ mkResult "" Continue (Just p)) (return . mkResult "💥" Continue . Just)
 
 finish :: Command
-finish [] _ = endMsg >>= \e ->
-                 return $ mkResult e Discontinue Nothing
+finish [] _ = info >>= (\e ->
+                 return $ mkResult e Discontinue Nothing) . endMsg
 finish xs _ = return $ mkResult (arityMismatch 0 (length xs)) Continue Nothing
 
 runReplCmd :: Puzzle -> String -> IO ReplResult

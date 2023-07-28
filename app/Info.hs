@@ -1,24 +1,27 @@
-module Info (endMsg, putInfoLn) where
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-import           Config       (configPath, dbPath)
-import           Data.Functor ((<&>))
-import qualified Data.Version as V
-import           Text.Printf  (printf)
+module Info (info, Info(..), putInfoLn) where
 
-version :: IO Version
-version = return $ mkVersion [1, 0]
+import           Config          (configPath, dbPath)
+import           Data.Version    (makeVersion, showVersion)
+import           Dhall           (FromDhall, Generic, auto, input)
+import           Numeric.Natural (Natural)
+import           Text.Printf     (printf)
+
+data Info = Info { version    :: [Natural]
+                 , desc       :: String
+                 , configInfo :: String
+                 , dbInfo     :: String
+                 , endMsg     :: String
+                 } deriving (Show, Generic, FromDhall)
+
+info :: IO Info
+info = input auto "./info.dhall"
 
 versionStr :: IO String
-versionStr = showVersion <$> version
-
-desc :: IO String
-desc = printf "Chunizm, version %s" <$> versionStr
-
-configInfo :: IO String
-configInfo = configPath <&> maybe "" (printf "Loaded configuration file from %s")
-
-endMsg :: IO String
-endMsg = return "Leaving Chunizm."
+versionStr = showVersion . makeVersion . map fromIntegral . version <$> info
 
 putInfoLn :: IO ()
 putInfoLn = do putDescLn
@@ -26,20 +29,17 @@ putInfoLn = do putDescLn
                putUsingDBLn
 
 putUsingDBLn :: IO ()
-putUsingDBLn = dbPath >>= putStrLn . printf "Using DB at %s"
+putUsingDBLn = do dbInfoRaw <- dbInfo <$> info
+                  db <- dbPath
+                  putStrLn $ printf dbInfoRaw db
 
 putConfigInfoLn :: IO ()
-putConfigInfoLn = configInfo >>= putStrLn
+putConfigInfoLn = do confInfoRaw <- configInfo <$> info
+                     res <- maybe "" (printf confInfoRaw) <$> configPath
+                     putStrLn res
 
 putDescLn :: IO ()
-putDescLn = desc >>= putStrLn
+putDescLn = do descRaw <- desc <$> info
+               ver <- versionStr
+               putStrLn $ printf descRaw ver
 
---- impl
-
-type Version = V.Version
-
-mkVersion :: [Int] -> V.Version
-mkVersion = V.makeVersion
-
-showVersion :: V.Version -> String
-showVersion = V.showVersion
