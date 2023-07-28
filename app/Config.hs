@@ -59,6 +59,7 @@ defaultConfig = do db' <- getResponse "Input db: "
                                    , prompt = ">> "
                                    , hidden = "*"
                                    , defaultPuzzleSize = 10
+                                   , clipboardPuzzle = False
                                    }
 
 --- impl
@@ -73,6 +74,7 @@ data Config = Config { db                :: String
                      , prompt            :: Prompt
                      , hidden            :: String
                      , defaultPuzzleSize :: Natural
+                     , clipboardPuzzle   :: Bool
                      } deriving (Show, Generic, FromDhall, Eq)
 
 parseConfig :: FilePath -> IO Config

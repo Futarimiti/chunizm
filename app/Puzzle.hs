@@ -16,7 +16,7 @@ module Puzzle ( Puzzle(..)
               ) where
 
 import           Config          (Config (..), dbPath, userConfig)
-import           Control.Monad   ((>=>))
+import           Control.Monad   (liftM2, (>=>))
 import           Data.Bool       (bool)
 import           Data.Char       (isLatin1, isSpace, toUpper)
 import           Data.Function   (on)
@@ -25,6 +25,7 @@ import           Data.List       (genericTake)
 import           Numeric.Natural (Natural)
 import           Prelude         hiding (showChar)
 import           Rando           (shuffle)
+import           System.Hclip    (setClipboard)
 import           Util            (canon, canonical, (<<$>>))
 
 type Solution = String
@@ -45,14 +46,14 @@ labelledSolutions :: Puzzle -> String
 labelledSolutions = unlines . enumerated . solutions
 
 censor :: Solution -> IO Clue
-censor sol = userConfig >>= bool (return . map (const Hidden) $ sol)
-                                 (return . map (bool Hidden (Lit ' ') . isSpace) $ sol) . showSpace
+censor = (userConfig >>=) . (. showSpace) . liftM2 bool (return . map (const Hidden)) (return . map (bool Hidden (Lit ' ') . isSpace))
 
 showPuzzle :: Puzzle -> IO String
 showPuzzle = fmap (unlines . enumerated) . mapM (showChars . fst) . puzzle
 
 printPuzzle :: Puzzle -> IO ()
-printPuzzle = showPuzzle >=> putStrLn
+printPuzzle = (userConfig >>=) . (. clipboardPuzzle) . liftM2 bool (showPuzzle >=> putStrLn)
+                                                                   (showPuzzle >=> liftM2 (>>) putStrLn setClipboard)
 
 emptyPuzzle :: Puzzle
 emptyPuzzle = Puzzle []

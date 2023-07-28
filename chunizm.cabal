@@ -71,7 +71,7 @@ executable chunizm
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base, containers, filepath, directory, dhall, unicode-data, transformers, text, unix, safe, rando
+    build-depends:    base, containers, filepath, directory, dhall, unicode-data, transformers, text, unix, safe, rando, Hclip
 
     -- Directories containing source files.
     hs-source-dirs:   app
