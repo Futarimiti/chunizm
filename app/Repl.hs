@@ -66,8 +66,7 @@ showSolutions _ p = return $ mkResult (labelledSolutions p) Continue Nothing
 
 -- generate new puzzle
 new :: Command
--- temp
-new [] _ = userConfig >>= selectFromDB . defaultPuzzleSize <&> mkResult "" Continue . Just
+new [] _ = mkResult "" Continue . Just <$> (userConfig >>= selectFromDB . defaultPuzzleSize)
 new [n] _ = maybe (return $ mkResult (illegalArg n) Continue Nothing)
                   (selectFromDB >=> (return . mkResult "" Continue . Just))
                   (readMaybe n)

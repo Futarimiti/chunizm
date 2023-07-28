@@ -18,7 +18,7 @@ data Info = Info { version    :: [Natural]
                  } deriving (Show, Generic, FromDhall)
 
 info :: IO Info
-info = input auto "./info.dhall"
+info = input auto "./resources/info.dhall"
 
 versionStr :: IO String
 versionStr = showVersion . makeVersion . map fromIntegral . version <$> info
