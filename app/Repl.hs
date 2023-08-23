@@ -1,4 +1,7 @@
+{-# LANGUAGE PatternSynonyms  #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ViewPatterns     #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Repl (repl) where
 
@@ -21,18 +24,19 @@ import           Text.Printf          (printf)
 import           Text.Read            (readMaybe)
 
 repl :: IO ()
-repl = installSIGINTHandler >> catch @SomeException (replWithPuzzle emptyPuzzle) (const $ putStrLn "" >> (endMsg <$> info) >>= putStrLn)
+repl = installSIGINTHandler
+    >> catch @SomeException (replWithPuzzle emptyPuzzle)
+                            (const $ putStrLn ""
+                                  >> (endMsg <$> info)
+                                 >>= putStrLn)
 
 replWithPuzzle :: Puzzle -> IO ()
 replWithPuzzle p = do putPrompt
                       hFlush stdout
                       input <- getLine
-                      res <- runReplCmd p input
-                      let output = extractOutput res
+                      ReplResult output newPuzzle continue <- runReplCmd p input
                       putOutputLn output
-                      let newPuzzle = extractPuzzle res
                       mapM_ printPuzzle newPuzzle
-                      let continue = extractContinue res
                       when (isContinue continue) (replWithPuzzle (fromMaybe p newPuzzle))
 
 type Command = Args -> Puzzle -> IO ReplResult
@@ -80,7 +84,7 @@ uncover [_] _ = return $ mkResult "You may only uncover a single letter!" Contin
 uncover xs _ = return $ mkResult (arityMismatch 1 (length xs)) Continue Nothing
 
 try :: Command
-try [] _ = return $ mkResult (arityMismatch 1 (0 :: Int)) Continue Nothing
+try [] _ = return $ mkResult (arityMismatch @Int 1 0) Continue Nothing
 try xs p = try1 (unwords xs) p  -- dirty, but may need refactor whole lot of things to fix FIXME
 
 try1 :: String -> Puzzle -> IO ReplResult
@@ -92,12 +96,11 @@ finish [] _ = info >>= (\e ->
 finish xs _ = return $ mkResult (arityMismatch 0 (length xs)) Continue Nothing
 
 runReplCmd :: Puzzle -> String -> IO ReplResult
-runReplCmd p input = case words input of
-                       [] -> return $ mkResult "" Continue Nothing
-                       cmd:args -> maybe
+runReplCmd p (words -> cmd:args) = maybe
                                      (return $ mkResult (cmdNotFound cmd) Continue Nothing)
                                      (\f -> f args p)
                                      (replCmds !? cmd)
+runReplCmd _ _ = return $ mkResult "" Continue Nothing
 
 --- impl
 
@@ -105,20 +108,14 @@ type Output = String
 data Continue = Continue | Discontinue
 type ReplResult = (Output, Continue, Maybe Puzzle)
 
+pattern ReplResult :: a -> c -> b -> (a, b, c)
+pattern ReplResult o p c = (o, c, p)
+
 mkResult :: Output -> Continue -> Maybe Puzzle -> ReplResult
 mkResult = (,,)
 
 type Args = [String]
 type Map = M.Map
-
-extractContinue :: ReplResult -> Continue
-extractContinue (_, a, _) = a
-
-extractOutput :: ReplResult -> Output
-extractOutput (a, _, _) = a
-
-extractPuzzle :: ReplResult -> Maybe Puzzle
-extractPuzzle (_, _, p) = p
 
 isContinue :: Continue -> Bool
 isContinue Continue    = True

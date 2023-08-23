@@ -15,22 +15,21 @@ module Puzzle ( Puzzle(..)
               , selectFromDB
               ) where
 
-import           Config          (Config (..), dbPath, userConfig)
-import           Control.Monad   (liftM2, (>=>))
-import           Data.Bool       (bool)
-import           Data.Char       (isLatin1, isSpace, toUpper)
-import           Data.Function   (on)
-import           Data.Functor    ((<&>))
-import           Data.List       (genericTake)
-import           Numeric.Natural (Natural)
-import           Prelude         hiding (showChar)
-import           Rando           (shuffle)
-import           System.Hclip    (setClipboard)
-import           Util            (canon, canonical, (<<$>>))
-
-type Solution = String
-type Clue = [Character]
-newtype Puzzle = Puzzle { puzzle :: [(Clue, Solution)] } deriving (Show, Eq)
+import           Config                    (Config (..), dbPath, userConfig)
+import           Control.Applicative       (Alternative (empty))
+import           Control.Monad             (liftM2, (>=>))
+import           Control.Monad.Trans.Class (MonadTrans (lift))
+import           Control.Monad.Trans.Maybe (MaybeT (..))
+import           Data.Bool                 (bool)
+import           Data.Char                 (isLatin1, isSpace, toUpper)
+import           Data.Function             (on)
+import           Data.Functor              ((<&>))
+import           Data.List                 (genericTake)
+import           Numeric.Natural           (Natural)
+import           Prelude                   hiding (showChar)
+import           Rando                     (shuffle)
+import           System.Hclip              (setClipboard)
+import           Util                      (canon, canonical)
 
 mkPuzzle :: [Solution] -> IO Puzzle
 mkPuzzle sols = Puzzle . (`zip` sols) <$> mapM censor sols
@@ -62,12 +61,14 @@ hiddenSymbol :: IO String
 hiddenSymbol = userConfig <&> hidden
 
 attempt :: String -> Puzzle -> IO (Maybe Puzzle)
-attempt word = (Puzzle <<$>>) . attempt' word . puzzle
+attempt = (runMaybeT .) . attemptT
 
-attempt' :: String -> [([Character], Solution)] -> IO (Maybe [([Character], Solution)])
-attempt' _ [] = return Nothing
-attempt' word ((clue, sol):xs) = word `matches` sol >>= bool (((clue, sol):) <<$>> attempt' word xs)
-                                                             (return . Just $ (fromString sol, sol):xs)
+attemptT :: String -> Puzzle -> MaybeT IO Puzzle
+attemptT _ (Puzzle [])                  = empty
+attemptT word (Puzzle ((clue, sol):xs)) = do matched <- lift $ word `matches` sol
+                                             if matched then return . Puzzle $ (strToChars sol, sol) : xs
+                                                        else do Puzzle res <- attemptT word (Puzzle xs)
+                                                                return . Puzzle $ (clue, sol) : res
 
 -- returns IO Bool since user settings may modify the result
 matches :: String -> Solution -> IO Bool
@@ -98,6 +99,10 @@ x =? y = do caseSen <- caseSensitive <$> userConfig
                                   (False, False) -> toUpper . canon) x y
 --- impl
 
+type Solution = String
+type Clue = [Character]
+newtype Puzzle = Puzzle { puzzle :: [(Clue, Solution)] } deriving (Show, Eq)
+
 enumerated :: [String] -> [String]
 enumerated = zipWith (++) labels
   where labels = (++ ". ") . show @Int <$> [1..]
@@ -105,8 +110,8 @@ enumerated = zipWith (++) labels
 data Character = Lit Char | Hidden
   deriving (Show, Eq)
 
-fromString :: String -> [Character]
-fromString = map Lit
+strToChars :: String -> [Character]
+strToChars = map Lit
 
 showChar :: Character -> IO String
 showChar (Lit c) = return [c]

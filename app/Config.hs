@@ -8,16 +8,19 @@ module Config ( userPrompt
               , Config(..)
               ) where
 
-import           Control.Applicative (asum)
-import           Control.Monad       (filterM)
-import           Data.Text           (pack)
-import           Dhall               (FromDhall, auto, input)
-import           GHC.Generics        (Generic)
-import           Numeric.Natural     (Natural)
-import           System.Directory    (doesFileExist)
-import           System.Environment  (lookupEnv)
-import           System.FilePath     ((<.>), (</>))
-import           Util                ((<<$>>))
+import           Control.Applicative       (asum)
+import           Control.Monad             (guard)
+import           Control.Monad.Trans.Class (MonadTrans (lift))
+import           Control.Monad.Trans.Maybe (MaybeT (MaybeT, runMaybeT))
+import           Data.Text                 (pack)
+import           Dhall                     (FromDhall, auto, input)
+import           GHC.Generics              (Generic)
+import           Numeric.Natural           (Natural)
+import           System.Directory          (XdgDirectory (XdgConfig),
+                                            doesFileExist, getHomeDirectory,
+                                            getXdgDirectory)
+import           System.Environment        (lookupEnv)
+import           System.FilePath           ((<.>), (</>))
 
 dbPath :: IO FilePath
 dbPath = db <$> userConfig
@@ -27,24 +30,23 @@ userPrompt = prompt <$> userConfig
 
 {- searching order:
 - env var $CHUNIZM_CONFIG
-- if $XDG set: $XDG/chunizm/config.dhall
-  else $HOME/.config/chunizm/config.dhall
+- $XDG_CONFIG_HOME/chunizm/config.dhall (or ~/.config if env var not set)
 - $HOME/.chunizm
 -}
 configPath :: IO (Maybe FilePath)
-configPath = configPaths >>= fmap asum . filterM (maybe (return False) doesFileExist)
+configPath = runMaybeT configPathT
 
-configPaths :: IO [Maybe FilePath]
-configPaths = sequence [ lookupEnv "CHUNIZM_CONFIG"
-                       , (</> "chunizm/config" <.> ex) <<$>> xdg
-                       , (</> ".config/chunizm/config" <.> ex) <<$>> home
-                       , (</> ".chunizm") <<$>> home
-                       ] where home = lookupEnv "HOME"
-                               xdg = lookupEnv "XDG_CONFIG_HOME"
-                               ex = configExtension
+configPathT :: MaybeT IO FilePath
+configPathT = asum configPathsT
 
-configExtension :: String
-configExtension = "dhall"
+configPathsT :: [MaybeT IO FilePath]
+configPathsT = [ MaybeT . lookupEnv $ envName
+               , do xdg <- lift . getXdgDirectory XdgConfig $ "chunizm/config" <.> configExtension
+                    exists <- lift $ doesFileExist xdg
+                    guard exists
+                    return xdg
+               , (</> ".chunizm") <$> lift getHomeDirectory
+               ]
 
 userConfig :: IO Config
 userConfig = configPath >>= maybe defaultConfig parseConfig
@@ -82,3 +84,9 @@ parseConfig = input auto . pack
 
 getResponse :: String -> IO String
 getResponse s = putStr s >> getLine
+
+envName :: FilePath
+envName = "CHUNIZM_CONFIG"
+
+configExtension :: FilePath
+configExtension = "dhall"
