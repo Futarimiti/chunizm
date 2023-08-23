@@ -85,10 +85,11 @@ uncover xs _ = return $ mkResult (arityMismatch 1 (length xs)) Continue Nothing
 
 try :: Command
 try [] _ = return $ mkResult (arityMismatch @Int 1 0) Continue Nothing
-try xs p = try1 (unwords xs) p  -- dirty, but may need refactor whole lot of things to fix FIXME
+try xs p = try1 xs p
 
-try1 :: String -> Puzzle -> IO ReplResult
-try1 word p = attempt word p >>= maybe (return $ mkResult "" Continue (Just p)) (return . mkResult "💥" Continue . Just)
+try1 :: [String] -> Puzzle -> IO ReplResult
+try1 w p = attempt w p >>= maybe (return $ mkResult "" Continue (Just p))
+                                 (return . mkResult "💥" Continue . Just)
 
 finish :: Command
 finish [] _ = info >>= (\e ->

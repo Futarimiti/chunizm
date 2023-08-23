@@ -1,5 +1,5 @@
-{-# LANGUAGE TupleSections    #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections       #-}
 
 module Puzzle ( Puzzle(..)
               , hiddenSymbol
@@ -24,6 +24,7 @@ import           Data.Bool                 (bool)
 import           Data.Char                 (isLatin1, isSpace, toUpper)
 import           Data.Function             (on)
 import           Data.Functor              ((<&>))
+import           Data.Functor.Compose      (Compose (..))
 import           Data.List                 (genericTake)
 import           Numeric.Natural           (Natural)
 import           Prelude                   hiding (showChar)
@@ -60,25 +61,26 @@ emptyPuzzle = Puzzle []
 hiddenSymbol :: IO String
 hiddenSymbol = userConfig <&> hidden
 
-attempt :: String -> Puzzle -> IO (Maybe Puzzle)
+attempt :: [String] -> Puzzle -> IO (Maybe Puzzle)
 attempt = (runMaybeT .) . attemptT
 
-attemptT :: String -> Puzzle -> MaybeT IO Puzzle
-attemptT _ (Puzzle [])                  = empty
-attemptT word (Puzzle ((clue, sol):xs)) = do matched <- lift $ word `matches` sol
-                                             if matched then return . Puzzle $ (strToChars sol, sol) : xs
-                                                        else do Puzzle res <- attemptT word (Puzzle xs)
-                                                                return . Puzzle $ (clue, sol) : res
+attemptT :: [String] -> Puzzle -> MaybeT IO Puzzle
+attemptT _ (Puzzle [])               = empty
+attemptT w (Puzzle ((clue, sol):xs)) = do matched <- lift $ w `matches` sol
+                                          if matched then return . Puzzle $ (strToChars sol, sol) : xs
+                                                    else do Puzzle res <- attemptT w (Puzzle xs)
+                                                            return . Puzzle $ (clue, sol) : res
 
 -- returns IO Bool since user settings may modify the result
-matches :: String -> Solution -> IO Bool
-matches word sol = do caseSen <- caseSensitive <$> userConfig
-                      accentSen <- accentSensitive <$> userConfig
-                      return $ ((==) `on` case (caseSen, accentSen) of
-                                 (True, True)   -> id
-                                 (True, False)  -> map toUpper
-                                 (False, True)  -> canonical
-                                 (False, False) -> map toUpper . canonical) word sol
+matches :: [String] -> Solution -> IO Bool
+matches w sol = do caseSen <- caseSensitive <$> userConfig
+                   accentSen <- accentSensitive <$> userConfig
+                   let f = case (caseSen, accentSen) of
+                             (True, True) -> (==)
+                             (True, False) -> (==) `on` fmap toUpper . Compose
+                             (False, True) -> (==) `on` fmap canonical
+                             (False, False) -> (==) `on` fmap toUpper . Compose . fmap canonical
+                   return $ f w (words sol)
 
 reveal :: Char -> Puzzle -> IO Puzzle
 reveal c = fmap Puzzle . mapM (\(clue, sol) -> revealClue c sol (=?) clue <&> (, sol)) . puzzle
@@ -105,7 +107,7 @@ newtype Puzzle = Puzzle { puzzle :: [(Clue, Solution)] } deriving (Show, Eq)
 
 enumerated :: [String] -> [String]
 enumerated = zipWith (++) labels
-  where labels = (++ ". ") . show @Int <$> [1..]
+  where labels = [show x ++ ". " | x :: Int <- [1..]]
 
 data Character = Lit Char | Hidden
   deriving (Show, Eq)
