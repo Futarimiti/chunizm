@@ -40,7 +40,7 @@ configPathT :: MaybeT IO FilePath
 configPathT = asum configPathsT
 
 configPathsT :: [MaybeT IO FilePath]
-configPathsT = [ MaybeT . lookupEnv $ envName
+configPathsT = [ MaybeT (lookupEnv envName)
                , do xdg <- lift . getXdgDirectory XdgConfig $ "chunizm/config" <.> configExtension
                     exists <- lift $ doesFileExist xdg
                     guard exists
