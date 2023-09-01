@@ -11,19 +11,24 @@ module Config ( userPrompt
 import           Control.Applicative       (asum)
 import           Control.Monad             (guard)
 import           Control.Monad.Trans.Class (MonadTrans (lift))
-import           Control.Monad.Trans.Maybe (MaybeT (MaybeT, runMaybeT))
+import           Control.Monad.Trans.Maybe (MaybeT (..))
 import           Data.Text                 (pack)
-import           Dhall                     (FromDhall, auto, input)
-import           GHC.Generics              (Generic)
-import           Numeric.Natural           (Natural)
+import           Dhall                     (FromDhall, Generic, Natural, auto,
+                                            input)
+import           Paths_chunizm             (getDataFileName)
 import           System.Directory          (XdgDirectory (XdgConfig),
                                             doesFileExist, getHomeDirectory,
                                             getXdgDirectory)
+
+
 import           System.Environment        (lookupEnv)
 import           System.FilePath           ((<.>), (</>))
 
 dbPath :: IO FilePath
-dbPath = db <$> userConfig
+dbPath = do c <- userConfig
+            case db c of
+              Just f  -> return f
+              Nothing -> getResponse "Enter path to your db: "
 
 userPrompt :: IO Prompt
 userPrompt = prompt <$> userConfig
@@ -41,7 +46,7 @@ configPathT = asum configPathsT
 
 configPathsT :: [MaybeT IO FilePath]
 configPathsT = [ MaybeT (lookupEnv envName)
-               , do xdg <- lift . getXdgDirectory XdgConfig $ "chunizm/config" <.> configExtension
+               , do xdg <- lift $ getXdgDirectory XdgConfig ("chunizm/config" <.> configExtension)
                     exists <- lift $ doesFileExist xdg
                     guard exists
                     return xdg
@@ -49,26 +54,18 @@ configPathsT = [ MaybeT (lookupEnv envName)
                ]
 
 userConfig :: IO Config
-userConfig = configPath >>= maybe defaultConfig parseConfig
+userConfig = do path <- configPath
+                defaultPath <- getDataFileName "defaults.dhall"
+                case path of
+                  Nothing -> parseFile defaultPath
+                  Just f  -> parseConfig (defaultPath ++ " // " ++ f)  -- DIRTY!
 
-defaultConfig :: IO Config
-defaultConfig = do db' <- getResponse "Input db: "
-                   return $ Config { db = db'
-                                   , accentSensitive = False
-                                   , caseSensitive = False
-                                   , alphaNumOnly = True
-                                   , showSpace = True
-                                   , prompt = ">> "
-                                   , hidden = "*"
-                                   , defaultPuzzleSize = 10
-                                   , clipboardPuzzle = False
-                                   }
 
 --- impl
 
 type Prompt = String
 
-data Config = Config { db                :: String
+data Config = Config { db                :: Maybe FilePath
                      , accentSensitive   :: Bool
                      , caseSensitive     :: Bool
                      , alphaNumOnly      :: Bool
@@ -79,8 +76,11 @@ data Config = Config { db                :: String
                      , clipboardPuzzle   :: Bool
                      } deriving (Show, Generic, FromDhall, Eq)
 
-parseConfig :: FilePath -> IO Config
+parseConfig :: String -> IO Config
 parseConfig = input auto . pack
+
+parseFile :: FilePath -> IO Config
+parseFile = parseConfig
 
 getResponse :: String -> IO String
 getResponse s = putStr s >> getLine
