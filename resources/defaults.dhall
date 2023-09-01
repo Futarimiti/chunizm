@@ -5,4 +5,5 @@
 , showSpace = True
 , defaultPuzzleSize = 10
 , clipboardPuzzle = True
+, equalCharSpan = True
 }

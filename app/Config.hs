@@ -63,6 +63,7 @@ userConfig = do path <- configPath
 
 --- impl
 
+
 type Prompt = String
 
 data Config = Config { db                :: Maybe FilePath
@@ -74,6 +75,7 @@ data Config = Config { db                :: Maybe FilePath
                      , hidden            :: String
                      , defaultPuzzleSize :: Natural
                      , clipboardPuzzle   :: Bool
+                     , equalCharSpan     :: Bool
                      } deriving (Show, Generic, FromDhall, Eq)
 
 parseConfig :: String -> IO Config
