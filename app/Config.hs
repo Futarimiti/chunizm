@@ -76,7 +76,8 @@ data Config = Config { db                :: Maybe FilePath
                      , defaultPuzzleSize :: Natural
                      , clipboardPuzzle   :: Bool
                      , equalCharSpan     :: Bool
-                     } deriving (Show, Generic, FromDhall, Eq)
+                     , listing           :: Natural -> String -> String
+                     } deriving (Generic, FromDhall)
 
 parseConfig :: String -> IO Config
 parseConfig = input auto . pack
