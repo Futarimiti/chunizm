@@ -31,7 +31,6 @@ executable chunizm
                     , Paths_chunizm
                     , DB
     build-depends:    base
-                    , containers
                     , filepath
                     , directory
                     , dhall
