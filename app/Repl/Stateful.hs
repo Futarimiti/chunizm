@@ -11,7 +11,7 @@ import           Control.Monad.Trans.State (StateT (runStateT))
 import           Error                     (cmdNotFound)
 import           Info                      (Info (endMsg), info, putInfoLn)
 import           Puzzle.Gen                (empty)
-import           Puzzle.Show               (showPuzzle)
+import           Puzzle.Show               (printClipPuzzle)
 import           Puzzle.Types              (Puzzle)
 import           Repl.Commands             (display, finish, new, showSolutions,
                                             try, uncover)
@@ -33,7 +33,7 @@ replWithPuzzle c p = do putPrompt c
                         input <- getLine
                         ((output, continue, doPrint), res) <- runStateT (runReplCmd c input) p
                         unless (null output) (putStrLn output)
-                        when doPrint (putStrLn (showPuzzle c res))
+                        when doPrint (printClipPuzzle c res)
                         when continue (replWithPuzzle c res)
 
 runReplCmd :: Config
