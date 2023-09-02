@@ -1,9 +1,7 @@
 module Main (main) where
 
-import Repl (repl)
-import Info (putInfoLn)
+import           Repl.Stateful (repl)
 
 main :: IO ()
-main = do putInfoLn
-          repl
+main = repl
 

@@ -25,3 +25,10 @@ updateAt n f (x:xs)
   | n < 0 = x:xs
   | otherwise = x : updateAt (n - 1) f xs
 updateAt _ _ xs = xs
+
+lookup' :: Eq a => a -> [([a], b)] -> Maybe b
+lookup' _ [] = Nothing
+lookup' key ((keys, v):xs)
+  | key `elem` keys = Just v
+  | otherwise = lookup' key xs
+

@@ -1,4 +1,4 @@
-module Error (cmdNotFound, arityMismatch, aritiesMismatch, illegalArg) where
+module Error where
 
 import           Data.List   (intercalate)
 import           Text.Printf (PrintfArg, printf)
@@ -18,3 +18,6 @@ cmdNotFound = printf "*** command not found: %s"
 
 illegalArg :: Arg -> ErrMsg
 illegalArg = printf "*** illegal argument: %s"
+
+canOnlyUncover1Letter :: ErrMsg
+canOnlyUncover1Letter = "*** only one letter may be uncovered each time"

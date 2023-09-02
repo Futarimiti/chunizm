@@ -4,7 +4,8 @@
 
 module Info (info, Info(..), putInfoLn) where
 
-import           Config          (configPath, dbPath)
+import           Config          (configPath, getUserDBPath)
+import           Config.Types    (Config)
 import           Data.Text       (pack)
 import           Data.Version    (makeVersion, showVersion)
 import           Dhall           (FromDhall, Generic, auto, input)
@@ -25,15 +26,15 @@ info = getDataFileName "info.dhall" >>= input auto . pack
 versionStr :: IO String
 versionStr = showVersion . makeVersion . map fromIntegral . version <$> info
 
-putInfoLn :: IO ()
-putInfoLn = do putDescLn
-               putConfigInfoLn
-               putUsingDBLn
+putInfoLn :: Config -> IO ()
+putInfoLn c = do putDescLn
+                 putConfigInfoLn
+                 putUsingDBLn c
 
-putUsingDBLn :: IO ()
-putUsingDBLn = do dbInfoRaw <- dbInfo <$> info
-                  db <- dbPath
-                  putStrLn $ printf dbInfoRaw db
+putUsingDBLn :: Config -> IO ()
+putUsingDBLn c = do dbInfoRaw <- dbInfo <$> info
+                    db <- getUserDBPath c
+                    putStrLn $ printf dbInfoRaw db
 
 putConfigInfoLn :: IO ()
 putConfigInfoLn = do confInfoRaw <- configInfo <$> info

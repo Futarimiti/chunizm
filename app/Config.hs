@@ -1,37 +1,31 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE ViewPatterns #-}
 
-module Config ( userPrompt
-              , dbPath
-              , configPath
+module Config ( configPath
               , userConfig
-              , Config(..)
+              , getUserDBPath
+              , putPrompt
               ) where
 
+import           Config.Types
 import           Control.Applicative       (asum)
 import           Control.Monad             (guard)
 import           Control.Monad.Trans.Class (MonadTrans (lift))
 import           Control.Monad.Trans.Maybe (MaybeT (..))
 import           Data.Text                 (pack)
-import           Dhall                     (FromDhall, Generic, Natural, auto,
-                                            input)
+import           Dhall                     (auto, input)
 import           Paths_chunizm             (getDataFileName)
 import           System.Directory          (XdgDirectory (XdgConfig),
                                             doesFileExist, getHomeDirectory,
                                             getXdgDirectory)
-
-
 import           System.Environment        (lookupEnv)
 import           System.FilePath           ((<.>), (</>))
 
-dbPath :: IO FilePath
-dbPath = do c <- userConfig
-            case db c of
-              Just f  -> return f
-              Nothing -> getResponse "Enter path to your db: "
+putPrompt :: Config -> IO ()
+putPrompt c = putStr (prompt c)
 
-userPrompt :: IO Prompt
-userPrompt = prompt <$> userConfig
+getUserDBPath :: Config -> IO FilePath
+getUserDBPath (db -> Just f) = return f
+getUserDBPath _              = getResponse "Enter path to your db: "
 
 {- searching order:
 - env var $CHUNIZM_CONFIG
@@ -63,21 +57,6 @@ userConfig = do path <- configPath
 
 --- impl
 
-
-type Prompt = String
-
-data Config = Config { db                :: Maybe FilePath
-                     , accentSensitive   :: Bool
-                     , caseSensitive     :: Bool
-                     , alphaNumOnly      :: Bool
-                     , showSpace         :: Bool
-                     , prompt            :: Prompt
-                     , hidden            :: String
-                     , defaultPuzzleSize :: Natural
-                     , clipboardPuzzle   :: Bool
-                     , equalCharSpan     :: Bool
-                     , listing           :: Natural -> String -> String
-                     } deriving (Generic, FromDhall)
 
 parseConfig :: String -> IO Config
 parseConfig = input auto . pack

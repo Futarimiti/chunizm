@@ -16,12 +16,20 @@ executable chunizm
     import:           warnings
     main-is:          Main.hs
     other-modules:    Config
+                    , Config.Types
                     , Info
-                    , Repl
+                    , Repl.Types
+                    , Repl.Stateful
+                    , Repl.Commands
                     , Error
-                    , Puzzle
+                    , Puzzle.Attempt
+                    , Puzzle.Types
+                    , Puzzle.Show
+                    , Puzzle.Gen
+                    , Puzzle.Reveal
                     , Util
                     , Paths_chunizm
+                    , DB
     build-depends:    base
                     , containers
                     , filepath
