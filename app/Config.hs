@@ -50,13 +50,17 @@ configPathsT = [ MaybeT (lookupEnv envName)
 userConfig :: IO Config
 userConfig = do path <- configPath
                 defaultPath <- getDataFileName "defaults.dhall"
-                case path of
-                  Nothing -> parseFile defaultPath
-                  Just f  -> parseConfig (defaultPath ++ " // " ++ f)  -- DIRTY!
+                maybe parseFile override path defaultPath
 
 
 --- impl
 
+
+-- | Dirty
+override :: FilePath  -- user
+         -> FilePath  -- default
+         -> IO Config
+override user def = parseConfig $ def ++ " // " ++ user
 
 parseConfig :: String -> IO Config
 parseConfig = input auto . pack
