@@ -11,5 +11,5 @@ type Outcome = ( String  -- output
 
 type Command = Config
             -> [String]  -- arguments
-            -> StateT Puzzle IO Outcome
+            -> StateT Round IO Outcome
 

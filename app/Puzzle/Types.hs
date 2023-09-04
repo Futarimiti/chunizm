@@ -1,6 +1,7 @@
 module Puzzle.Types where
 
-import           Data.Set     (Set)
+import           Data.List.NonEmpty (NonEmpty)
+import           Data.Set           (Set)
 import           Player.Types
 
 type Solution = [Solution1]
@@ -17,5 +18,5 @@ type Puzzle = [Puzzle1]
 
 data Round = Round { puzzle :: Puzzle
                    , opened :: Set Char
-                   , next   :: Maybe Player
+                   , player :: Maybe (NonEmpty Player)
                    }
