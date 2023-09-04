@@ -20,5 +20,6 @@ data Config = Config { db                :: Maybe FilePath
                      , clipboardPuzzle   :: Bool
                      , equalCharSpan     :: Bool
                      , listing           :: Natural -> String -> String
+                     , players           :: [String]
                      } deriving (Generic, FromDhall)
 
