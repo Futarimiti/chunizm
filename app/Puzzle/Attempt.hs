@@ -12,9 +12,9 @@ import           Puzzle.Reveal             (revealN, uncensorAll)
 import           Puzzle.Types              (Puzzle)
 import           Util                      (canon, canonical)
 
--- | Guess a song.
--- If correct, the corresponding entry will be exposed.
-attempt :: Config -> [String] -> StateT Puzzle IO Bool
+-- | Attempt a guess
+-- Will reveal the corresponding entry upon success
+attempt :: Monad m => Config -> [String] -> StateT Puzzle m Bool
 attempt c xs = do p <- get
                   case findIndex (match xs) (uncensorAll p) of
                     Nothing                  -> return False
