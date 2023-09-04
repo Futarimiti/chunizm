@@ -7,4 +7,5 @@
 , clipboardPuzzle = True
 , equalCharSpan = True
 , listing = \(n : Natural) -> \(s : Text) -> "${Natural/show n}. ${s}"
+, players = [] : List Text
 }

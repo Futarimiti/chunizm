@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE ViewPatterns     #-}
 
 module Repl.Stateful where
 
@@ -37,13 +36,12 @@ replWithPuzzle c p = do putPrompt c
                         when continue (replWithPuzzle c res)
 
 runReplCmd :: Config
-            -> String  -- user input in repl
-            -> StateT Puzzle IO Outcome
-runReplCmd c (words -> cmd:args) = case lookup' cmd replCmds of
-                                      Just replCmd -> replCmd c args
-                                      Nothing -> return (cmdNotFound cmd, True, False)
-runReplCmd _ _ {- empty line -} = skip
-  where skip = return ("", True, False)
+           -> String  -- raw repl input
+           -> StateT Puzzle IO Outcome
+runReplCmd c input
+  | (cmd:args) <- words input , Just replCmd <- lookup' cmd replCmds = replCmd c args
+  | (cmd:_) <- words input = return (cmdNotFound cmd, True, False)
+  | otherwise = return ("", True, False)
 
 replCmds :: [([String], Command)]
 replCmds = [ (["uncover", "open"], uncover)
