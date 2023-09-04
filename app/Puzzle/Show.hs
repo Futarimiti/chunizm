@@ -7,6 +7,7 @@ module Puzzle.Show ( showPuzzleChar
 
 import           Config.Types  (Config (..))
 import           Control.Monad (when)
+import           Data.Char     (isSpace)
 import           Puzzle.Types
 import           System.Hclip  (setClipboard)
 
@@ -14,7 +15,9 @@ showPuzzleChar :: Config -> PuzzleChar -> String
 showPuzzleChar c (Exposed x)
   | equalCharSpan c = x : (' ' <$ drop 1 (hidden c))
   | otherwise = [x]
-showPuzzleChar c (Censored _) = hidden c
+showPuzzleChar c (Censored ch)
+  | isSpace ch = if showSpace c then " " else [ch]
+  | otherwise = hidden c
 
 showPuzzle1 :: Config -> Puzzle1 -> String
 showPuzzle1 = concatMap . showPuzzleChar
