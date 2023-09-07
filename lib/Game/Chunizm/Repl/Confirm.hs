@@ -13,7 +13,7 @@ confirm :: MonadIO m => ReaderT Global m Bool
 confirm = do doConfirm <- asks (confirmDestructive . config)
              if doConfirm then do Info {..} <- asks info
                                   liftIO $ do putStrLn confirmation
-                                              putStrLn proceeding
+                                              putStr proceeding
                                               hFlush stdout
                                               input <- getChar
                                               putStrLn ""
