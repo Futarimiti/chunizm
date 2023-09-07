@@ -6,4 +6,6 @@
 , cancelConfirm  = "Cancelled."
 , emptyBoard     = "The board is empty."
 , version        = [1, 1]
+, versionDisplay = \(v : Text) -> "Chunizm, version ${v}"
+, dbDisplay      = \(db : Text) -> "Using data source at ${db}"
 }

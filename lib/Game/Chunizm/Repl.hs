@@ -8,6 +8,7 @@ import           Control.Monad.Trans.Maybe        (MaybeT (runMaybeT),
                                                    hoistMaybe)
 import           Control.Monad.Trans.Reader       (ReaderT (runReaderT),
                                                    runReader)
+import           Data.Version                     (makeVersion, showVersion)
 import           Game.Chunizm.Core.Types
 import           Game.Chunizm.Errors.Show         (renderError)
 import           Game.Chunizm.Repl.Commands.Parse (decompose, parseCommand)
@@ -19,12 +20,17 @@ import           System.IO                        (hFlush, stdout)
 import           System.IO.Error
 
 startRepl :: Global -> IO ()
-startRepl g = do putStrLn (welcomeMessage (info g))
-                 _ <- runReaderT installSIGINTHandler (config g)
+startRepl g = do let c = config g
+                 let i = info g
+                 putStrLn (welcomeMessage i)
+                 when (showVersionAtStart c) $ putStrLn (versionDisplay i . showVersion . makeVersion . map fromIntegral $ version i)
+                 when (showDBAtStart c) $ putStrLn (dbDisplay i (dataSource c))
+                 hFlush stdout
+                 _ <- runReaderT installSIGINTHandler c
                  catch @IOError
                        (repl g emptyRound)
-                       (\e -> if isEOFError e then putStrLn "" >> putStrLn (leaveMessage (info g))
-                                              else putStrLn "" >> putStrLn (errorMessage (info g)))
+                       (\e -> if isEOFError e then putStrLn "" >> putStrLn (leaveMessage i)
+                                              else putStrLn "" >> putStrLn (errorMessage i))
 
 -- |
 -- * Put prompt

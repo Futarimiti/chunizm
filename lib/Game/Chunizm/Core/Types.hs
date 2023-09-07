@@ -40,14 +40,16 @@ data Errors = Errors { illegalArgsError   :: String -> String
                      } deriving (Show, Generic, FromDhall)
 
 -- | To be read from an external resources.
-data Info = Info { leaveMessage   :: String     -- | Displayed when the user exits REPL.
-                 , welcomeMessage :: String     -- | Displayed when the user enters REPL.
-                 , confirmation   :: String     -- | Displayed when the user needs to confirm a destructive decision.
-                 , proceeding     :: String     -- | Asks if the user would like to proceed their decision.
-                 , cancelConfirm  :: String     -- | Displayed when the user cancels a confirmation.
-                 , emptyBoard     :: String     -- | Display this when trying to display an empty board.
-                 , errorMessage   :: String     -- | Displayed when an unknown exception has occurred.
-                 , version        :: [Natural]  -- | Current version represented in list of nats
+data Info = Info { leaveMessage   :: String              -- | Displayed when the user exits REPL.
+                 , welcomeMessage :: String              -- | Displayed when the user enters REPL.
+                 , confirmation   :: String              -- | Displayed when the user needs to confirm a destructive decision.
+                 , proceeding     :: String              -- | Asks if the user would like to proceed their decision.
+                 , cancelConfirm  :: String              -- | Displayed when the user cancels a confirmation.
+                 , emptyBoard     :: String              -- | Display this when trying to display an empty board.
+                 , errorMessage   :: String              -- | Displayed when an unknown exception has occurred.
+                 , version        :: [Natural]           -- | Current version represented in list of nats
+                 , versionDisplay :: String -> String    -- | How to present the version information.
+                 , dbDisplay      :: FilePath -> String  -- | How to present the path to data source.
                  } deriving (Show, Generic, FromDhall)
 
 -- | Outcome of executing a REPL command.
