@@ -77,7 +77,7 @@ data Config = Config { printComponents    :: [Component]  -- | To print which co
                      , suppressErrors     :: Bool         -- | Suppress errors messages? (highly unrecommended)
                      , betwComponents     :: String       -- | What to be intercalated between components when showing them?
                      , showVersionAtStart :: Bool         -- | Show version of Chunizm at the start of the game.
-                     , showDBAtStart      :: Bool         -- | Show path to DB at the start of the game.
+                     , showDBAtStart      :: Bool         -- | Show DB in use at the start of the game.
                      } deriving (Show, Eq, Generic, FromDhall, ToDhall)
 
 -- | Used to specify relative positions of each component.
