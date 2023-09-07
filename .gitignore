@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/haskell
-# Edit at https://www.toptal.com/developers/gitignore?templates=haskell
+# Created by https://www.toptal.com/developers/gitignore/api/macos,haskell
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,haskell
 
 ### Haskell ###
 dist
@@ -25,11 +25,6 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
-
-# End of https://www.toptal.com/developers/gitignore/api/haskell
-
-# Created by https://www.toptal.com/developers/gitignore/api/macos
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos
 
 ### macOS ###
 # General
@@ -63,6 +58,6 @@ Temporary Items
 # iCloud generated files
 *.icloud
 
-# End of https://www.toptal.com/developers/gitignore/api/macos
+# End of https://www.toptal.com/developers/gitignore/api/macos,haskell
 
 .history

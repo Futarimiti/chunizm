@@ -7,41 +7,84 @@ category:           Game
 build-type:         Simple
 data-dir:           resources
 data-files:         info.dhall
-                  , defaults.dhall
+                  , errors.dhall
+
 
 common warnings
-    ghc-options: -Wall
+    ghc-options: -Wall -Wmonomorphism-restriction 
+
+library
+    import:           warnings
+    exposed-modules:  Game.Chunizm 
+                    , Game.Chunizm.Core.Types 
+                    , Game.Chunizm.Config.Override
+                    , Game.Chunizm.Config.Parse
+                    , Game.Chunizm.Config.Load
+                    , Game.Chunizm.Config.Encode
+                    , Game.Chunizm.Round.Gen
+                    , Game.Chunizm.Board.Gen
+                    , Game.Chunizm.Board.Try
+                    , Game.Chunizm.Board.Reveal
+                    , Game.Chunizm.Board.Reveal.Char 
+                    , Game.Chunizm.DataSource.Take
+                    , Game.Chunizm.DataSource.Parse
+                    , Game.Chunizm.Board.Show
+                    , Game.Chunizm.Errors.Show
+                    , Game.Chunizm.Repl
+                    , Game.Chunizm.Repl.PrintClip
+                    , Game.Chunizm.Repl.Confirm
+                    , Game.Chunizm.Repl.Interrupt
+                    , Game.Chunizm.Repl.Commands.Collection
+                    , Game.Chunizm.Repl.Commands.Run 
+                    , Game.Chunizm.Repl.Commands.Parse
+                    , Game.Chunizm.Repl.Commands.CommandSet
+    other-modules:    Game.Chunizm.Config.Override.Dhall
+                    , Game.Chunizm.Config.Encode.Dhall
+                    , Game.Chunizm.Config.Parse.Dhall
+    -- other-extensions:
+    build-depends:    base ^>=4.17.1.0
+                    , containers <0.5.8.1 || >0.5.8.1 && <0.5.9.1 || >0.5.9.1
+                    , dhall <1.0.0 || >1.0.0 && <1.4.0 || >1.4.0 && <1.4.1 || >1.4.1 && <1.15.0 || >1.15.0 && <1.16.0 || >1.16.0 && <1.20.0 || >1.20.0 && <1.26.0 || >1.26.0 && <1.31.0 || >1.31.0 && <1.40.0 || >1.40.0 && <1.41.0 || >1.41.0
+                    , text
+                    , transformers >0.6.0.5
+                    , directory >=1.2.3.0 && <1.2.6.1 || >1.2.6.1
+                    , random-shuffle >=0.0.3
+                    , unicode-data <0.4.0 || >0.4.0
+                    , unix >=2.7.3
+                    , Hclip >=3.0.0.4
+                    , safe
+    hs-source-dirs:   lib
+    default-language: Haskell2010
 
 executable chunizm
     import:           warnings
     main-is:          Main.hs
-    other-modules:    Config
-                    , Config.Types
-                    , Player.Types
-                    , Info
-                    , Repl.Types
-                    , Repl.Stateful
-                    , Repl.Commands
-                    , Error
-                    , Puzzle.Attempt
-                    , Puzzle.Types
-                    , Puzzle.Show
-                    , Puzzle.Gen
-                    , Puzzle.Reveal
-                    , Util
+    other-modules:    Resources
                     , Paths_chunizm
-                    , DB
-    build-depends:    base
+    -- other-extensions:
+    build-depends:    base ^>=4.17.1.0
+                    , chunizm
+                    , transformers >0.6.0.5
                     , filepath
-                    , directory
-                    , dhall
-                    , unicode-data
-                    , transformers
-                    , text
-                    , unix
-                    , safe
-                    , rando
-                    , Hclip
-                    , containers
+                    , dhall <1.0.0 || >1.0.0 && <1.4.0 || >1.4.0 && <1.4.1 || >1.4.1 && <1.15.0 || >1.15.0 && <1.16.0 || >1.16.0 && <1.20.0 || >1.20.0 && <1.26.0 || >1.26.0 && <1.31.0 || >1.31.0 && <1.40.0 || >1.40.0 && <1.41.0 || >1.41.0
+                    , directory >=1.2.3.0 && <1.2.6.1 || >1.2.6.1
+                    , containers <0.5.8.1 || >0.5.8.1 && <0.5.9.1 || >0.5.9.1
+
     hs-source-dirs:   app
     default-language: Haskell2010
+
+test-suite chunizm-test
+    import:           warnings
+    default-language: Haskell2010
+    other-modules:    Canonical
+                    , Show
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Main.hs
+    build-depends: base ^>=4.17.1.0
+                 , chunizm 
+                 , dhall <1.0.0 || >1.0.0 && <1.4.0 || >1.4.0 && <1.4.1 || >1.4.1 && <1.15.0 || >1.15.0 && <1.16.0 || >1.16.0 && <1.20.0 || >1.20.0 && <1.26.0 || >1.26.0 && <1.31.0 || >1.31.0 && <1.40.0 || >1.40.0 && <1.41.0 || >1.41.0
+                 , HUnit
+                 , transformers >0.6.1.1
+                 , containers <0.5.8.1 || >0.5.8.1 && <0.5.9.1 || >0.5.9.1

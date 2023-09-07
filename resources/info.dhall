@@ -1,6 +1,7 @@
-{ version = [1, 0]
-, desc = "Chunizm, version %s"
-, configInfo = "Loaded configuration file from %s"
-, dbInfo = "Using DB at %s"
-, endMsg = "Leaving Chunizm."
+{ leaveMessage   = "Leaving Chunizm."
+, startupMessage = "Welcome to Chunizm."
+, confirmation   = "You're about to perform a destructive move."
+, proceeding     = "Proceed? [Y/N]"
+, cancelConfirm  = "Cancelled."
+, emptyBoard     = "The board is empty."
 }

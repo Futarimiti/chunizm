@@ -1,7 +1,7 @@
-module Main (main) where
+module Main where
 
-import           Repl.Stateful (repl)
+import           Game.Chunizm
+import           Resources    (globals)
 
 main :: IO ()
-main = repl
-
+main = globals >>= chunizm
