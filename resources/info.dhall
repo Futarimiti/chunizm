@@ -5,4 +5,5 @@
 , proceeding     = "Proceed? [Y/N]"
 , cancelConfirm  = "Cancelled."
 , emptyBoard     = "The board is empty."
+, version        = [1, 1]
 }

@@ -75,4 +75,6 @@ defaults = Config { printComponents = [ Output
                   , replPrompt = ">> "
                   , suppressErrors = False
                   , betwComponents = "\n\n"
+                  , showVersionAtStart = True
+                  , showDBAtStart = True
                   }

@@ -40,13 +40,14 @@ data Errors = Errors { illegalArgsError   :: String -> String
                      } deriving (Show, Generic, FromDhall)
 
 -- | To be read from an external resources.
-data Info = Info { leaveMessage   :: String  -- | Displayed when the user exits REPL.
-                 , startupMessage :: String  -- | Displayed when the user enters REPL.
-                 , confirmation   :: String  -- | Displayed when the user needs to confirm a destructive decision.
-                 , proceeding     :: String  -- | Asks if the user would like to proceed their decision.
-                 , cancelConfirm  :: String  -- | Displayed when the user cancels a confirmation.
-                 , emptyBoard     :: String  -- | Display this when trying to display an empty board.
-                 , errorMessage   :: String  -- | Displayed when an unknown exception has occurred.
+data Info = Info { leaveMessage   :: String     -- | Displayed when the user exits REPL.
+                 , startupMessage :: String     -- | Displayed when the user enters REPL.
+                 , confirmation   :: String     -- | Displayed when the user needs to confirm a destructive decision.
+                 , proceeding     :: String     -- | Asks if the user would like to proceed their decision.
+                 , cancelConfirm  :: String     -- | Displayed when the user cancels a confirmation.
+                 , emptyBoard     :: String     -- | Display this when trying to display an empty board.
+                 , errorMessage   :: String     -- | Displayed when an unknown exception has occurred.
+                 , version        :: [Natural]  -- | Current version represented in list of nats
                  } deriving (Show, Generic, FromDhall)
 
 -- | Outcome of executing a REPL command.
@@ -75,6 +76,8 @@ data Config = Config { printComponents    :: [Component]  -- | To print which co
                      , replPrompt         :: String       -- | Self-explanatory.
                      , suppressErrors     :: Bool         -- | Suppress errors messages? (highly unrecommended)
                      , betwComponents     :: String       -- | What to be intercalated between components when showing them?
+                     , showVersionAtStart :: Bool         -- | Show version of Chunizm at the start of the game.
+                     , showDBAtStart      :: Bool         -- | Show path to DB at the start of the game.
                      } deriving (Show, Eq, Generic, FromDhall, ToDhall)
 
 -- | Used to specify relative positions of each component.
