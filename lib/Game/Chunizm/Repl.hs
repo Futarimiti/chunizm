@@ -1,5 +1,8 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Game.Chunizm.Repl where
 
+import           Control.Exception
 import           Control.Monad                    (when)
 import           Control.Monad.Trans.Maybe        (MaybeT (runMaybeT),
                                                    hoistMaybe)
@@ -13,15 +16,15 @@ import           Game.Chunizm.Repl.Interrupt      (installSIGINTHandler)
 import           Game.Chunizm.Repl.PrintClip      (clipComps, printComps)
 import           Game.Chunizm.Round.Gen           (emptyRound)
 import           System.IO                        (hFlush, stdout)
+import           System.IO.Error
 
 startRepl :: Global -> IO ()
 startRepl g = do putStrLn (startupMessage (info g))
                  _ <- runReaderT installSIGINTHandler (config g)
-                 repl g emptyRound
-                 -- catch @SomeException
-                       -- (repl g emptyRound)
-                       -- (const $ do putStrLn ""
-                       --             putStrLn (leaveMessage (info g)))
+                 catch @IOError
+                       (repl g emptyRound)
+                       (\e -> if isEOFError e then putStrLn "" >> putStrLn (leaveMessage (info g))
+                                              else putStrLn "" >> putStrLn (errorMessage (info g)))
 
 -- |
 -- * Put prompt

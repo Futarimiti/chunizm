@@ -46,6 +46,7 @@ data Info = Info { leaveMessage   :: String  -- | Displayed when the user exits 
                  , proceeding     :: String  -- | Asks if the user would like to proceed their decision.
                  , cancelConfirm  :: String  -- | Displayed when the user cancels a confirmation.
                  , emptyBoard     :: String  -- | Display this when trying to display an empty board.
+                 , errorMessage   :: String  -- | Displayed when an unknown exception has occurred.
                  } deriving (Show, Generic, FromDhall)
 
 -- | Outcome of executing a REPL command.
