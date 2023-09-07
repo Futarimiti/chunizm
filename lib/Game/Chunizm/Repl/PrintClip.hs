@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase      #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Game.Chunizm.Repl.PrintClip where
+module Game.Chunizm.Repl.PrintClip (printComps, clipComps) where
 
 import           Control.Monad.Trans.Reader (ReaderT, ask, asks, runReader,
                                              withReaderT)
