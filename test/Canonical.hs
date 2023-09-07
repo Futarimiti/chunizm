@@ -63,35 +63,11 @@ matchUsing = runReader matchChar
 matchThese :: Test
 matchThese = "Should match chars according to config" ~: TestList $
   -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-
-  -- exact match only
-  -- exact match only
-  -- exact match only
-  -- exact match only
-
-  -- exact match only
-  -- exact match only
-
-  -- exact match only
   [ matchUsing sensitive 'a' 'a' ~?= True
   , matchUsing sensitive 'a' 'A' ~?= False
   , matchUsing sensitive 'a' 'å' ~?= False
   ]
   <>
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
-  -- case sensitive, accent insensitive
   -- case sensitive, accent insensitive
   [ matchUsing onlyCase 'a' 'a' ~?= True
   , matchUsing onlyCase 'a' 'A' ~?= False
@@ -100,16 +76,12 @@ matchThese = "Should match chars according to config" ~: TestList $
   ]
   <>
   -- accent sensitive, case insensitive
-  -- accent sensitive, case insensitive
-  -- accent sensitive, case insensitive
-  -- accent sensitive, case insensitive
   [ matchUsing onlyAccent 'a' 'a' ~?= True
   , matchUsing onlyAccent 'a' 'A' ~?= True
   , matchUsing onlyAccent 'a' 'å' ~?= False
   , matchUsing onlyAccent 'A' 'Å' ~?= False
   ]
   <>
-  -- everything should match
   -- everything should match
   [ matchUsing insensitive 'a' 'a' ~?= True
   , matchUsing insensitive 'a' 'A' ~?= True
