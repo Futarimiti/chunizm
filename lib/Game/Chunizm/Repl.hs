@@ -8,6 +8,7 @@ import           Control.Monad.Trans.Maybe        (MaybeT (runMaybeT),
                                                    hoistMaybe)
 import           Control.Monad.Trans.Reader       (ReaderT (runReaderT),
                                                    runReader)
+import           Data.Char                        (isSpace)
 import           Data.Version                     (makeVersion, showVersion)
 import           Game.Chunizm.Core.Types
 import           Game.Chunizm.Errors.Show         (renderError)
@@ -36,7 +37,7 @@ startRepl g = do let c = config g
 -- * Put prompt
 -- * Get input
 -- * Parse as command
---   * Failed -> throw error, restart
+--   * Failed -> unless empty (throw error), restart
 -- * Exec command
 --   * Error arisen -> throw it, restart
 -- * Get results
@@ -55,6 +56,7 @@ repl g r = do let c = config g
                                         cmd <- hoistMaybe $ runReader parseCommand (cmdset g) cmdstr
                                         return (cmd, args)
               case cmdargs of
+                Nothing | all isSpace raw -> repl g r
                 Nothing -> do runReader renderError c (malformedCmdError e)
                               repl g r
                 Just (cmd, args) -> do ei <- runIO cmd args g r
