@@ -19,7 +19,7 @@ import           System.IO                        (hFlush, stdout)
 import           System.IO.Error
 
 startRepl :: Global -> IO ()
-startRepl g = do putStrLn (startupMessage (info g))
+startRepl g = do putStrLn (welcomeMessage (info g))
                  _ <- runReaderT installSIGINTHandler (config g)
                  catch @IOError
                        (repl g emptyRound)

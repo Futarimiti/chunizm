@@ -41,7 +41,7 @@ data Errors = Errors { illegalArgsError   :: String -> String
 
 -- | To be read from an external resources.
 data Info = Info { leaveMessage   :: String     -- | Displayed when the user exits REPL.
-                 , startupMessage :: String     -- | Displayed when the user enters REPL.
+                 , welcomeMessage :: String     -- | Displayed when the user enters REPL.
                  , confirmation   :: String     -- | Displayed when the user needs to confirm a destructive decision.
                  , proceeding     :: String     -- | Asks if the user would like to proceed their decision.
                  , cancelConfirm  :: String     -- | Displayed when the user cancels a confirmation.
