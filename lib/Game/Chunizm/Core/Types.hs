@@ -4,10 +4,10 @@
 module Game.Chunizm.Core.Types where
 
 import           Control.Monad.Trans.Except (ExceptT)
-import           Control.Monad.Trans.Reader (ReaderT)
-import           Control.Monad.Trans.State  (StateT)
+import           Control.Monad.Trans.RWS    (RWST)
 import           Data.Map                   (Map)
 import           Data.Set                   (Set)
+import           Data.Void                  (Void)
 import           Dhall                      (FromDhall, ToDhall)
 import           GHC.Generics               (Generic)
 import           Numeric.Natural            (Natural)
@@ -15,9 +15,7 @@ import           Text.Show.Functions        ()
 
 -- | A REPL command.
 type Command = Maybe String  -- | Args, unsplit since spacing may be significant.
-            -> ReaderT Global (StateT Round (ExceptT Error IO)) Outcome
--- or with RWST?
--- RWST Global Void Round (ExceptT Error IO) Outcome
+            -> RWST Global Void Round (ExceptT Error IO) Outcome
 
 -- | A collection of commands.
 type CommandSet = Map String  -- | name to invoke this command
