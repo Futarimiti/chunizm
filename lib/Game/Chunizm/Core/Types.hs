@@ -15,6 +15,7 @@ import           Text.Show.Functions        ()
 -- | A REPL command.
 type Command = Maybe String  -- | Args, unsplit since spacing may be significant.
             -> RWST Global () Round (ExceptT Error IO) Outcome
+-- Maybe I'll invent "@REST@" someday
 
 -- | A collection of commands.
 type CommandSet = Map String  -- | name to invoke this command
