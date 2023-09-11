@@ -3,15 +3,16 @@
 
 module Game.Chunizm.Board.Reveal where
 
-import           Control.Monad.Trans.Class      (MonadTrans (lift))
-import           Control.Monad.Trans.Reader     (ReaderT, asks)
-import           Control.Monad.Trans.State      (StateT, gets, modify, put)
-import           Data.Functor.Compose           (Compose (Compose, getCompose))
-import           Data.Set                       (insert, member)
-import           Game.Chunizm.Board.Reveal.Char (matchChar)
+import           Control.Monad.Trans.Reader          (ReaderT, asks)
+import           Control.Monad.Trans.RWS             (RWST, gets, put)
+import           Control.Monad.Trans.State           (StateT, modify)
+import           Data.Functor.Compose                (Compose (Compose, getCompose))
+import           Data.Set                            (insert, member)
+import           Game.Chunizm.Board.Reveal.Char      (matchChar)
 import           Game.Chunizm.Core.Types
-import           Numeric.Natural                (Natural)
-import           Safe                           (atMay)
+import           Game.Chunizm.Core.Util.Transformers (liftReaderT)
+import           Numeric.Natural                     (Natural)
+import           Safe                                (atMay)
 
 reveal1 :: [GameChar] -> [GameChar]
 reveal1 = map exposeGameChar
@@ -31,18 +32,18 @@ revealNth (subtract 1 -> i) = modify $ updateAt i reveal1
 -- | Given a character @c@,
 -- opens up all characters within a board that *matches* @c@,
 -- and add @c@ to @opened@ if not already a member.
-open :: (Monad f)
-     => Char -> ReaderT Config (StateT Round f) ()
-open c = do match <- matchChar
+-- open :: Monad m => Char -> ReaderT Config (StateT Round m) ()
+open :: (Monad m, Monoid w) => Char -> RWST Config w Round m ()
+open c = do match <- liftReaderT matchChar
             let expose (Hidden ch) | match c ch = Exposed ch
                 expose a                        = a
-            o <- lift $ gets opened
-            b <- lift $ gets board
-            lift $ put Round { opened = insert c o
-                             , board = if c `member` o
-                                       then b
-                                       else getCompose $ expose <$> Compose b
-                             }
+            o <- gets opened
+            b <- gets board
+            put Round { opened = insert c o
+                      , board = if c `member` o
+                                then b
+                                else getCompose $ expose <$> Compose b
+                      }
 
 -- | Convert a board to list of strings, each corresponding to a solution.
 getSolutions :: Board -> [String]

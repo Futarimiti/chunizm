@@ -17,6 +17,7 @@ library
     import:           warnings
     exposed-modules:  Game.Chunizm 
                     , Game.Chunizm.Core.Types 
+                    , Game.Chunizm.Core.Util.Transformers
                     , Game.Chunizm.Config.Override
                     , Game.Chunizm.Config.Parse
                     , Game.Chunizm.Config.Load
