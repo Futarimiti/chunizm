@@ -32,7 +32,6 @@ revealNth (subtract 1 -> i) = modify $ updateAt i reveal1
 -- | Given a character @c@,
 -- opens up all characters within a board that *matches* @c@,
 -- and add @c@ to @opened@ if not already a member.
--- open :: Monad m => Char -> ReaderT Config (StateT Round m) ()
 open :: (Monad m, Monoid w) => Char -> RWST Config w Round m ()
 open c = do match <- liftReaderT matchChar
             let expose (Hidden ch) | match c ch = Exposed ch
