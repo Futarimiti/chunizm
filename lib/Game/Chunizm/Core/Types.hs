@@ -16,6 +16,8 @@ import           Text.Show.Functions        ()
 -- | A REPL command.
 type Command = Maybe String  -- | Args, unsplit since spacing may be significant.
             -> ReaderT Global (StateT Round (ExceptT Error IO)) Outcome
+-- or with RWST?
+-- RWST Global Void Round (ExceptT Error IO) Outcome
 
 -- | A collection of commands.
 type CommandSet = Map String  -- | name to invoke this command
@@ -68,8 +70,8 @@ data Config = Config { printComponents    :: [Component]  -- | To print which co
                                                           -- denoting the index and the puzzle.
                                                           -- example: @"%d. %s"@ gives @1. ****@
                      , hideSpace          :: Bool         -- | Decides whether spaces should be always exposed. Why not?
-                     , caseSensitive      :: Bool
-                     , accentSensitive    :: Bool
+                     , caseSensitive      :: Bool         -- | Self-explanatory.
+                     , accentSensitive    :: Bool         -- | Self-explanatory.
                      , confirmDestructive :: Bool         -- | Will need cofirmation on destructive moves.
                      , hiddenChar         :: String       -- | A *character* used in place of hidden characters.
                                                           -- Certain configuration languages do not support Char type
